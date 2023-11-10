@@ -3,4 +3,13 @@ src = "src"
 out = "out"
 libs = ["lib"]
 
+optimizer = true
+viaIR = true
+optimizer_runs = 666
+
+#gas_reports = ["Carbon"]
+
+# Foundry "Memory allocation overflow"
+memory_limit = 67108864
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

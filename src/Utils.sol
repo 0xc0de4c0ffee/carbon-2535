@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: WTFPL
-pragma solidity >0.8.0;
-import "../Core.sol";
-import "../interface/iERC165.sol";
-import "../interface/iERC173.sol";
-abstract contract Utils is Core, iERC173 {
+// SPDX-License-Identifier: WTFPL.ETH
+pragma solidity >0.8.0 <0.9.0;
 
-    function owner() external view returns(address){
+import "./Core.sol";
+import "./interface/iERC165.sol";
+import "./interface/iERC173.sol";
+
+abstract contract Utils is Core, iERC173 {
+    function owner() external view returns (address) {
         DATA storage DS;
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
