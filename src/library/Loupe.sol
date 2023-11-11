@@ -2,7 +2,7 @@
 pragma solidity >0.8.0 <0.9.0;
 
 import "../interface/iLoupe.sol";
-import "../Core.sol";
+import "../Carbon.sol";
 /**
  * @title
  * @author
@@ -29,6 +29,7 @@ library Loupe {
     }
     /// @notice Gets all facet addresses and their four byte function selectors.
     /// @return _facets Array of Facet
+
     function facets() external view returns (Facet[] memory _facets) {
         DATA storage DS = getDS();
         address[] memory _contracts = DS.contracts;
@@ -45,7 +46,7 @@ library Loupe {
             bytes4[] memory _selectors = new bytes4[](_functions.length);
             fCount = 0;
             for (uint256 i = 0; i < fLen; i++) {
-                if (DS.toContract[_functions[i]] == _facet) {
+                if (DS.libraries[_functions[i]] == _facet) {
                     _selectors[fCount++] = _functions[i];
                 }
             }
@@ -63,7 +64,7 @@ library Loupe {
         uint256 len = _functions.length;
         uint256 count;
         while (len > 0) {
-            if (DS.toContract[_functions[--len]] == _facet) {
+            if (DS.libraries[_functions[--len]] == _facet) {
                 _selectors[count++] = _functions[len];
             }
         }
@@ -82,6 +83,6 @@ library Loupe {
     /// @return The facet address.
     function facetAddress(bytes4 _selector) external view returns (address) {
         DATA storage DS = getDS();
-        return DS.toContract[_selector];
+        return DS.libraries[_selector];
     }
 }

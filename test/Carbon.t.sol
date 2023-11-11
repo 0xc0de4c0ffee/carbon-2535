@@ -2,8 +2,7 @@
 pragma solidity >0.8.0 <0.9.0;
 
 import {Test, console2} from "forge-std/Test.sol";
-import {Carbon} from "../src/Carbon.sol";
-import "../src/Core.sol";
+import "../src/Carbon.sol";
 import {Manager} from "../src/library/Manager.sol";
 import {Utils} from "../src/Utils.sol";
 import {Loupe} from "../src/library/Loupe.sol";
@@ -20,24 +19,25 @@ contract CarbonTest is Test {
     using Loupe for *;
     using Manager for *;
 
-    Carbon public carbon = new Carbon(address(Manager));
+    Carbon public carbon = new Carbon();
     iMeta public meta = iMeta(address(carbon));
+
+    constructor() {
+        carbon.init(address(Manager));
+    }
+
     //Loupe public loupe = new Loupe();
 
-    function setUp() public {
-        //
-    }
+    function setUp() public {}
     // [0x7a0ed627, 0xadfca15e, 0x52ef6b2c, 0xcdffacc6]
 
     function testInterface() public {
-        console2.log(address(Loupe));
-        assertTrue(meta.supportsInterface(Manager.newContract.selector));
+        assertTrue(meta.supportsInterface(Manager.newLibrary.selector));
     }
 
     function testNewContract() public {}
 
     function testGov() public {
-        console2.log(address(Manager));
         assertEq(meta.owner(), address(this));
     }
 

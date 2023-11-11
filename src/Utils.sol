@@ -1,30 +1,32 @@
 // SPDX-License-Identifier: WTFPL.ETH
 pragma solidity >0.8.0 <0.9.0;
 
-import "./Core.sol";
+import "./Carbon.sol";
 import "./interface/iERC165.sol";
 import "./interface/iERC173.sol";
 
-abstract contract Utils is Core, iERC173 {
+abstract contract Utils is iERC173 {
+    bytes32 public constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+
     function owner() external view returns (address) {
         DATA storage DS;
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             DS.slot := position
         }
-        return DS.GOV;
+        return DS.dev;
     }
 
-    function transferOwnership(address newGov) external {
+    function transferOwnership(address _newDev) external {
         DATA storage DS;
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             DS.slot := position
         }
-        if (msg.sender != DS.GOV) revert OnlyGovContract(DS.GOV);
-        DS.NewGov = newGov;
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
+        DS.newDev = _newDev;
         // signal only
-        emit OwnershipTransferred(msg.sender, newGov);
+        emit OwnershipTransferred(msg.sender, _newDev);
     }
 
     /// @dev Not part of ERC173
@@ -34,8 +36,8 @@ abstract contract Utils is Core, iERC173 {
         assembly {
             DS.slot := position
         }
-        if (msg.sender != DS.NewGov) revert OnlyGovContract(DS.NewGov);
-        emit OwnershipTransferred(DS.GOV, msg.sender);
-        DS.GOV = msg.sender;
+        if (msg.sender != DS.newDev) revert OnlyDev(DS.newDev);
+        emit OwnershipTransferred(DS.dev, msg.sender);
+        DS.dev = msg.sender;
     }
 }
