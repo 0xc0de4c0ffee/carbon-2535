@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: WTFPL.ETH
 pragma solidity >0.8.0 <0.9.0;
 
-import "../Carbon.sol";
+import "../Core.sol";
 /**
  * @title
  * @author
@@ -26,17 +26,19 @@ library Manager {
     event NewFunctions(address indexed _library, bytes4[] _functions);
     event RemovedFunctions(address indexed _library, bytes4[] _functions);
 
-    function getDS() private view returns (DATA storage DS) {
+    function getDS() private pure returns (DATA storage DS) {
         bytes32 position = DIAMOND_STORAGE_POSITION;
         assembly {
             DS.slot := position
         }
-        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
     }
 
-    function init(address _this) external {
+    function initLibrary(address _this) external {
         DATA storage DS = getDS();
+        /// @dev : double check?
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_this]) revert LibraryLocked();
+        /// @dev : disable reinit??
         //if (DS.functions[_this].length != 0) revert DuplicateLibrary(_this);
         DS.contracts.push(_this);
         DS.locked[_this] = true;
@@ -59,6 +61,7 @@ library Manager {
 
     function newLibrary(address _library, bytes4[] calldata _functions) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_library]) revert LibraryLocked();
         if ((DS.functions[_library].length) != 0) revert DuplicateLibrary(_library);
         for (uint256 i = 0; i < _functions.length; i++) {
@@ -74,9 +77,10 @@ library Manager {
 
     function removeLibrary(address _library) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_library]) revert LibraryLocked();
         bytes4[] memory _functions = DS.functions[_library];
-        if (_functions.length == 0) revert LibraryNotActive(_library);
+        if (_functions.length == 0) revert InactiveLibrary(_library);
         for (uint256 i = 0; i < _functions.length; i++) {
             if (DS.libraries[_functions[i]] == _library) {
                 delete DS.libraries[_functions[i]];
@@ -88,8 +92,9 @@ library Manager {
 
     function replaceLibrary(address _old, address _new) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_old]) revert LibraryLocked();
-        if (DS.functions[_old].length == 0) revert LibraryNotActive(_old);
+        if (DS.functions[_old].length == 0) revert InactiveLibrary(_old);
         if (DS.functions[_new].length != 0) revert DuplicateLibrary(_new);
         bytes4[] memory _functions = DS.functions[_old];
         for (uint256 i = 0; i < _functions.length; i++) {
@@ -105,9 +110,10 @@ library Manager {
 
     function addFunctions(address _library, bytes4[] calldata _functions) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_library]) revert LibraryLocked();
         bytes4[] storage _list = DS.functions[_library];
-        if (_list.length == 0) revert LibraryNotActive(_library);
+        if (_list.length == 0) revert InactiveLibrary(_library);
         bytes4 _f;
         for (uint256 i = 0; i < _functions.length; i++) {
             _f = _functions[i];
@@ -120,6 +126,7 @@ library Manager {
 
     function removeFunctions(address _library, bytes4[] calldata _functions) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_library]) revert LibraryLocked();
         bytes4 _f;
         uint256 len = _functions.length;
@@ -133,9 +140,10 @@ library Manager {
 
     function replaceFunctions(address _src, address _dst, bytes4[] calldata _functions) external {
         DATA storage DS = getDS();
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
         if (DS.locked[_src]) revert LibraryLocked();
         uint256 oLen = DS.functions[_src].length;
-        if (oLen == 0) revert LibraryNotActive(_src);
+        if (oLen == 0) revert InactiveLibrary(_src);
         //if (DS.functions[_dst].length != 0) {
         //    revert DuplicateLibrary(_dst);
         //}

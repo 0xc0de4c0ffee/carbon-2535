@@ -12,4 +12,6 @@ optimizer_runs = 666
 # Foundry "Memory allocation overflow"
 memory_limit = 67108864
 
+fs_permissions = [{ access = "read", path = "./out"}, { access = "write", path = "./.scratch"}, ]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

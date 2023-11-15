@@ -10,6 +10,7 @@ import "../src/interface/iERC165.sol";
 import "../src/interface/iERC173.sol";
 import "../src/interface/iManager.sol";
 import "../src/interface/iLoupe.sol";
+import "../src/interface/iUtils.sol";
 
 interface iMeta is iERC165, iERC173, iLoupe, iManager {
     function BadFunction() external;
@@ -23,7 +24,7 @@ contract CarbonTest is Test {
     iMeta public meta = iMeta(address(carbon));
 
     constructor() {
-        carbon.init(address(Manager));
+        carbon.initLibrary(address(Manager));
     }
 
     //Loupe public loupe = new Loupe();
