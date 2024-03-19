@@ -19,19 +19,51 @@ import "../Carbon.sol";
  */
 
 library Loupe {
-    bytes32 public constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+    bytes32 public constant DIAMOND_STORAGE_POSITION =
+        keccak256("diamond.standard.diamond.storage");
+    event UpdatedLibrary(address indexed _library, bytes4[] _functions);
+    event NewFunctions(address indexed _library, bytes4[] _functions);
 
-    function getDS() private pure returns (DATA storage DS) {
-        bytes32 position = DIAMOND_STORAGE_POSITION;
+    function init(address _this) external {
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        DATA storage DS;
         assembly {
-            DS.slot := position
+            DS.slot := _slot
+        }
+        /// @dev : double check?
+        if (msg.sender != DS.dev) revert OnlyDev(DS.dev);
+        if (DS.locked[_this]) revert LibraryLocked();
+        /// @dev : disable reinit??
+        //if (DS.functions[_this].length != 0) revert DuplicateLibrary(_this);
+        DS.contracts.push(_this);
+        DS.locked[_this] = true;
+        DS.libraries[Loupe.facets.selector] = _this;
+        DS.libraries[Loupe.facetFunctionSelectors.selector] = _this;
+        DS.libraries[Loupe.facetAddresses.selector] = _this;
+        DS.libraries[Loupe.facetAddress.selector] = _this;
+        DS.functions[_this] = [
+            Loupe.facets.selector,
+            Loupe.facetFunctionSelectors.selector,
+            Loupe.facetAddresses.selector,
+            Loupe.facetAddress.selector
+        ];
+        emit UpdatedLibrary(_this, DS.functions[_this]);
+    }
+    function getDS() private pure returns (DATA storage DS) {
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        assembly {
+            DS.slot := _slot
         }
     }
     /// @notice Gets all facet addresses and their four byte function selectors.
     /// @return _facets Array of Facet
 
     function facets() external view returns (Facet[] memory _facets) {
-        DATA storage DS = getDS();
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        DATA storage DS;
+        assembly {
+            DS.slot := _slot
+        }
         address[] memory _contracts = DS.contracts;
         bytes4[] memory _functions;
         uint256 cLen = _contracts.length;
@@ -58,8 +90,14 @@ library Loupe {
     /// @notice Gets all the function selectors supported by a specific facet.
     /// @param _facet The facet address.
     /// @return _selectors
-    function facetFunctionSelectors(address _facet) external view returns (bytes4[] memory _selectors) {
-        DATA storage DS = getDS();
+    function facetFunctionSelectors(
+        address _facet
+    ) external view returns (bytes4[] memory _selectors) {
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        DATA storage DS;
+        assembly {
+            DS.slot := _slot
+        }
         bytes4[] memory _functions = DS.functions[_facet];
         uint256 len = _functions.length;
         uint256 count;
@@ -73,7 +111,11 @@ library Loupe {
     /// @notice Get all the facet addresses used by a diamond.
     /// @return Facet addresses_
     function facetAddresses() external view returns (address[] memory) {
-        DATA storage DS = getDS();
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        DATA storage DS;
+        assembly {
+            DS.slot := _slot
+        }
         return DS.contracts;
     }
 
@@ -82,7 +124,11 @@ library Loupe {
     /// @param _selector The function selector.
     /// @return The facet address.
     function facetAddress(bytes4 _selector) external view returns (address) {
-        DATA storage DS = getDS();
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
+        DATA storage DS;
+        assembly {
+            DS.slot := _slot
+        }
         return DS.libraries[_selector];
     }
 }

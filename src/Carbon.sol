@@ -12,16 +12,15 @@ import "./Core.sol";
  * @notice
  * Based on EIP-2535 Diamond Standard: https://eips.ethereum.org/EIPS/eip-2535
  */
-
 contract Carbon is Utils {
     //bytes32 public immutable DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
     address Dev; // ??fallback/backup
 
     constructor() {
         DATA storage DS;
-        bytes32 position = DIAMOND_STORAGE_POSITION;
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
         assembly {
-            DS.slot := position
+            DS.slot := _slot
         }
         DS.dev = msg.sender;
         DS.locked[address(0)] = true; // lock zero addr
@@ -30,9 +29,9 @@ contract Carbon is Utils {
 
     fallback(bytes calldata) external payable returns (bytes memory _output) {
         DATA storage DS;
-        bytes32 position = DIAMOND_STORAGE_POSITION;
+        bytes32 _slot = DIAMOND_STORAGE_POSITION;
         assembly {
-            DS.slot := position
+            DS.slot := _slot
         }
         if (DS.paused) revert Paused(); // contract paused
         address _contract = DS.libraries[msg.sig];

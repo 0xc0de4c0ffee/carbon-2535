@@ -7,6 +7,5 @@ interface iERC173 {
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     // NOT ERC173
-
-    function acceptOwnership() external;
+    //function acceptOwnership() external;
 }

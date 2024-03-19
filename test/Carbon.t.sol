@@ -24,16 +24,21 @@ contract CarbonTest is Test {
     iMeta public meta = iMeta(address(carbon));
 
     constructor() {
-        carbon.initLibrary(address(Manager));
+        //carbon.initLibrary(address(Manager));
     }
 
     //Loupe public loupe = new Loupe();
 
-    function setUp() public {}
+    function setUp() public {
+        carbon.init(address(Manager));
+        carbon.init(address(Loupe));
+    }
     // [0x7a0ed627, 0xadfca15e, 0x52ef6b2c, 0xcdffacc6]
 
     function testInterface() public {
         assertTrue(meta.supportsInterface(Manager.newLibrary.selector));
+        assertTrue(meta.supportsInterface(Loupe.facets.selector));
+        assertTrue(meta.supportsInterface(Loupe.facetAddress.selector));
     }
 
     function testNewContract() public {}
